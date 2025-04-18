@@ -11,6 +11,7 @@ export default function Frame() {
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
+      event.preventDefault();
       const file = event.target.files?.[0];
       if (!file) return;
 
@@ -20,8 +21,14 @@ export default function Frame() {
       }
 
       try {
-        // Handle file upload logic here
-        // You'll need to implement your preferred storage solution
+        // Basic file validation
+        if (!file.type.startsWith('image/')) {
+          alert('Please upload an image file');
+          return;
+        }
+
+        // TODO: Implement your storage solution here
+        // For now, just simulate success
         setStep('success');
       } catch (error) {
         console.error('Upload failed:', error);
