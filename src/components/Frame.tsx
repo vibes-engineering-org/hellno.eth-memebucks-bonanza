@@ -1,48 +1,34 @@
+'use client';
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { useFrame } from '@frames.js/core/react';
+import { DaimoPayButton } from '@daimo/pay';
+import { optimismUSDC } from '@daimo/contract';
+import { getAddress } from 'viem';
 import { PROJECT_TITLE, MAX_FILE_SIZE, ENTRY_FEE, RECIPIENT_ADDRESS } from '../lib/constants';
 
 export default function Frame() {
   const [step, setStep] = useState<'payment' | 'upload' | 'success'>('payment');
-  const { frame } = useFrame();
 
-  const handlePayment = useCallback(async () => {
-    try {
-      // Initialize USDC payment
-      const tx = await frame.sendTransaction({
-        to: RECIPIENT_ADDRESS,
-        value: ENTRY_FEE * (10 ** 6), // USDC has 6 decimals
-        token: 'USDC'
-      });
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-      // Poll for transaction confirmation
-      const receipt = await frame.waitForTransaction(tx);
-      if (receipt.status === 'success') {
-        setStep('upload');
+      if (file.size > MAX_FILE_SIZE) {
+        alert('File too large! Maximum size is 5MB');
+        return;
       }
-    } catch (error) {
-      console.error('Payment failed:', error);
-    }
-  };
 
-  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > MAX_FILE_SIZE) {
-      alert('File too large! Maximum size is 5MB');
-      return;
-    }
-
-    try {
-      // Handle file upload logic here
-      // You'll need to implement your preferred storage solution
-      setStep('success');
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
-  };
+      try {
+        // Handle file upload logic here
+        // You'll need to implement your preferred storage solution
+        setStep('success');
+      } catch (error) {
+        console.error('Upload failed:', error);
+      }
+    },
+    [] // Empty dependencies array since we don't use any external values
+  );
 
   return (
     <div className="p-4 bg-purple-100 rounded-lg shadow-lg max-w-md mx-auto">
@@ -53,12 +39,19 @@ export default function Frame() {
       {step === 'payment' && (
         <div className="text-center">
           <p className="mb-4 text-purple-700">Entry fee: {ENTRY_FEE} USDC</p>
-          <button
-            onClick={handlePayment}
-            className="bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transform hover:scale-105 transition"
-          >
-            Pay Entry Fee 🪙
-          </button>
+          <DaimoPayButton
+            appId="pay-demo"
+            toAddress={RECIPIENT_ADDRESS}
+            toChain={optimismUSDC.chainId}
+            toUnits={`${ENTRY_FEE}.00`}
+            toToken={getAddress(optimismUSDC.token)}
+            intent="Enter Meme Contest"
+            onPaymentCompleted={() => setStep('upload')}
+            customTheme={{
+              '--ck-accent-color': '#A855F7',
+              '--ck-accent-text-color': '#ffffff',
+            }}
+          />
         </div>
       )}
 
