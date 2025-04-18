@@ -15,61 +15,49 @@ import { useFrameSDK } from "~/hooks/useFrameSDK";
 import { baseUSDC } from "@daimo/contract";
 import { getAddress } from "viem";
 import BucketExplorer from "./BucketExplorer";
+import { RECIPIENT_ADDRESS } from "../lib/constants";
 
-function ExampleCard() {
+function ContestCard() {
   return (
-    <Card>
+    <Card className="bg-gradient-to-r from-pink-100 to-purple-100">
       <CardHeader>
-        <CardTitle>Welcome to the vibes.engineering template</CardTitle>
-        <CardDescription>
-          This is an example card that you can customize or remove
+        <CardTitle className="text-2xl font-bold text-center">🎨 Meme Masters Contest 🏆</CardTitle>
+        <CardDescription className="text-center text-lg">
+          Show us your best memes! Win eternal glory (and maybe prizes) 🌟
+          <br/>
+          <span className="font-semibold">How to enter:</span>
+          <br/>
+          1. Pay 1 USDC entry fee 🪙
+          <br/>
+          2. Upload your dankest meme 🖼️
+          <br/>
+          3. Cross fingers and wait for results! 🤞
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Label>Place content in a Card here.</Label>
-      </CardContent>
     </Card>
   );
 }
 
-function PaymentComponent() {
-  const [address, setAddress] = useState<`0x${string}`>(
-    "0x32e3C7fD24e175701A35c224f2238d18439C7dBC", // ethereum protocol guild
-  );
-
+function EntryFeeComponent() {
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 bg-gradient-to-r from-green-100 to-blue-100">
       <CardHeader>
-        <CardTitle>Payment</CardTitle>
-        <CardDescription>Pay $1 using USDC on Base</CardDescription>
+        <CardTitle className="text-center">Entry Fee: 1 USDC 🪙</CardTitle>
+        <CardDescription className="text-center">Pay with USDC on Base to enter the contest!</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="address">Recipient Address</Label>
-          <input
-            id="address"
-            type="text"
-            value={address}
-            onChange={(e) => {
-              if (e.target.value.startsWith("0x")) {
-                return setAddress(e.target.value as `0x${string}`);
-              }
-            }}
-            className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter ETH address or ENS name"
-          />
-        </div>
-        <div className="flex justify-center">
-          <DaimoPayButton
-            appId="pay-demo" /* Example app ID you can use for prototyping */
-            toChain={baseUSDC.chainId}
-            toUnits="1.00" /* $1.00 USDC */
-            toToken={getAddress(baseUSDC.token)}
-            toAddress={address}
-            onPaymentStarted={(e) => console.log(e)}
-            onPaymentCompleted={(e) => console.log(e)}
-          />
-        </div>
+      <CardContent className="flex justify-center">
+        <DaimoPayButton
+          appId="meme-masters"
+          toChain={baseUSDC.chainId}
+          toUnits="1.00"
+          toToken={getAddress(baseUSDC.token)}
+          toAddress={RECIPIENT_ADDRESS}
+          onPaymentStarted={(e) => console.log("Payment started:", e)}
+          onPaymentCompleted={(e) => {
+            console.log("Payment completed:", e);
+            // Could store payment success in localStorage here
+          }}
+        />
       </CardContent>
     </Card>
   );
@@ -84,8 +72,8 @@ export default function MiniApp() {
 
   return (
     <div className="w-[400px] mx-auto py-2 px-2 space-y-4">
-      <ExampleCard />
-      <PaymentComponent />
+      <ContestCard />
+      <EntryFeeComponent />
       <FileUploadCard />
       <BucketExplorer />
     </div>
