@@ -2,12 +2,13 @@
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { DaimoPayButton } from '@daimo/pay';
-import { optimismUSDC } from '@daimo/contract';
+import { baseUSDC } from '@daimo/contract';
 import { getAddress } from 'viem';
 import { PROJECT_TITLE, MAX_FILE_SIZE, ENTRY_FEE, RECIPIENT_ADDRESS } from '../lib/constants';
 
 export default function Frame() {
   const [step, setStep] = useState<'payment' | 'upload' | 'success'>('payment');
+  const [isPending, setIsPending] = useState(false);
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,19 +47,27 @@ export default function Frame() {
       {step === 'payment' && (
         <div className="text-center">
           <p className="mb-4 text-purple-700">Entry fee: {ENTRY_FEE} USDC</p>
-          <DaimoPayButton
-            appId="pay-demo"
-            toAddress={RECIPIENT_ADDRESS}
-            toChain={optimismUSDC.chainId}
-            toUnits={`${ENTRY_FEE}.00`}
-            toToken={getAddress(optimismUSDC.token)}
-            intent="Enter Meme Contest"
-            onPaymentCompleted={() => setStep('upload')}
-            customTheme={{
-              '--ck-accent-color': '#A855F7',
-              '--ck-accent-text-color': '#ffffff',
-            }}
-          />
+          {isPending ? (
+            <p className="text-purple-700">Transaction pending... please wait</p>
+          ) : (
+            <DaimoPayButton
+              appId="pay-demo"
+              toAddress={RECIPIENT_ADDRESS}
+              toChain={baseUSDC.chainId}
+              toUnits={`${ENTRY_FEE}.00`}
+              toToken={getAddress(baseUSDC.token)}
+              intent="Enter Meme Contest"
+              onPaymentStarted={() => setIsPending(true)}
+              onPaymentCompleted={() => {
+                setIsPending(false);
+                setStep('upload');
+              }}
+              customTheme={{
+                '--ck-accent-color': '#A855F7',
+                '--ck-accent-text-color': '#ffffff',
+              }}
+            />
+          )}
         </div>
       )}
 

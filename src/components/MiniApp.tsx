@@ -38,7 +38,7 @@ function ContestCard() {
   );
 }
 
-function EntryFeeComponent() {
+function EntryFeeComponent({ onPaymentCompleted }: { onPaymentCompleted: () => void }) {
   return (
     <Card className="mt-4 bg-gradient-to-r from-green-100 to-blue-100">
       <CardHeader>
@@ -56,6 +56,7 @@ function EntryFeeComponent() {
           onPaymentCompleted={(e) => {
             console.log("Payment completed:", e);
             // Could store payment success in localStorage here
+            onPaymentCompleted();
           }}
         />
       </CardContent>
@@ -65,6 +66,7 @@ function EntryFeeComponent() {
 
 export default function MiniApp() {
   const { isSDKLoaded } = useFrameSDK();
+  const [paid, setPaid] = useState(false);
 
   if (!isSDKLoaded) {
     return <div>Loading...</div>;
@@ -73,9 +75,19 @@ export default function MiniApp() {
   return (
     <div className="w-[400px] mx-auto py-2 px-2 space-y-4">
       <ContestCard />
-      <EntryFeeComponent />
-      <FileUploadCard />
-      <BucketExplorer />
+      {!paid ? (
+        <EntryFeeComponent onPaymentCompleted={() => setPaid(true)} />
+      ) : (
+        <div className="text-green-600 font-bold text-center">
+          Payment successful! You can now upload your meme.
+        </div>
+      )}
+      {paid && (
+        <>
+          <FileUploadCard />
+          <BucketExplorer />
+        </>
+      )}
     </div>
   );
 }
